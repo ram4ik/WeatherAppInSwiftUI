@@ -15,9 +15,9 @@ enum NetworkError: Error {
 
 class WeatherService {
     
-    func getWeather(completion: @escaping (Result<Weather?, NetworkError>) -> Void) {
+    func getWeather(city: String, apiKey: String, completion: @escaping (Result<Weather?, NetworkError>) -> Void) {
         
-        guard let url = URL.urlForWeather() else {
+        guard let url = URL.urlForWeather(city, apiKey) else {
             
             return completion(.failure(.badUrl))
         }
