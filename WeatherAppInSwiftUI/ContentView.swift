@@ -30,7 +30,7 @@ struct ContentView: View {
             if self.weatherVM.loadingState == .loading {
                 Text("Loading...")
             } else if self.weatherVM.loadingState == .success {
-                WeatherView(temperature: self.weatherVM.temperature, humidity: self.weatherVM.humidity)
+                WeatherView(weatherVM: self.weatherVM)
             } else if self.weatherVM.loadingState == .failed {
                 Text(self.weatherVM.message)
             }
@@ -42,6 +42,12 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         
+        let vmNone = WeatherViewModel()
+        vmNone.loadingState = .none
+        
+        let vmSuccess = WeatherViewModel()
+        vmSuccess.loadingState = .success
+        
         let vmLoading = WeatherViewModel()
         vmLoading.loadingState = .loading
         vmLoading.message = "Loading..."
@@ -51,6 +57,8 @@ struct ContentView_Previews: PreviewProvider {
         vmFailed.message = "Unable to find the weather"
         
         return Group {
+            ContentView(weatherVM: vmNone)
+            ContentView(weatherVM: vmSuccess)
             ContentView(weatherVM: vmLoading)
             ContentView(weatherVM: vmFailed)
         }
@@ -58,17 +66,21 @@ struct ContentView_Previews: PreviewProvider {
 }
 
 struct WeatherView: View {
-    let temperature: Double
-    let humidity: Double
+    @ObservedObject var weatherVM: WeatherViewModel
     
     var body: some View {
         VStack(spacing: 10) {
-            Text("\(temperature)")
+            Text("\(self.weatherVM.temperature)")
                 .font(.largeTitle)
                 .foregroundColor(Color.white)
-            Text("\(humidity)")
+            Text("\(self.weatherVM.humidity)")
                 .foregroundColor(Color.white)
                 .opacity(0.7)
+            Picker(selection: self.$weatherVM.temperatureUnit, label: Text("Select a Unit")) {
+                ForEach(TemperatureUnit.allCases, id: \.self) { unit in
+                    Text(unit.title)
+                }
+            }.pickerStyle(SegmentedPickerStyle())
         }
         .padding()
         .frame(width: 300, height: 150)
